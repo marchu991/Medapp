@@ -1,0 +1,51 @@
+
+Hojas de datos:
+MAX30100: https://datasheets.maximintegrated.com/en/ds/MAX30100.pdf
+
+DS18B20:  https://datasheets.maximintegrated.com/en/ds/DS18B20.pdf
+
+AD8232: https://www.analog.com/media/en/technical-documentation/data-sheets/ad8232.pdf
+
+NodeMCU: https://www.handsontec.com/pdf_learn/esp8266-V10.pdf
+
+ESP8266: https://www.espressif.com/sites/default/files/documentation/0a-esp8266ex_datasheet_en.pdf
+
+TP4056: https://dlnmh9ip6v2uc.cloudfront.net/datasheets/Prototyping/TP4056.pdf
+
+
+Fuentes y links de utilidad:
+
+https://www.researchgate.net/publication/305488878_DISENO_Y_DESARROLLO_DE_UN_PROTOTIPO_DE_UN_MODULO_MOVIL_DE_MEDICIONES_MEDICAS_USANDO_ARDUINO
+
+https://www.intramed.net/contenidover.asp?contenidoid=78457
+
+https://dspace.ups.edu.ec/bitstream/123456789/15570/1/UPS-GT002148.pdf
+
+https://www.nodemcu.com/index_en.html
+
+https://programarfacil.com/podcast/nodemcu-tutorial-paso-a-paso/
+
+https://e-archivo.uc3m.es/bitstream/handle/10016/29308/TFG_Teresa_Castro_Blanco.pdf?sequence=1
+
+http://www.dalcame.com/ecg.html#.XpBvesgzbIU
+
+https://www.youtube.com/watch?v=h0jPd_T1c9U
+
+https://learn.sparkfun.com/tutorials/ad8232-heart-rate-monitor-hookup-guide/all
+
+https://create.arduino.cc/projecthub/protocentral/using-the-max30100-wearable-pulse-sensor-with-arduino-9b6984
+
+https://programarfacil.com/blog/arduino-blog/ds18b20-sensor-temperatura-arduino/
+
+https://es.wikipedia.org/wiki/1-Wire
+
+https://polaridad.es/max30100-sensor-latido-corazon-oximetro-pulso-i2c-wearable-salud/
+
+https://how2electronics.com/iot-ecg-monitoring-ad8232-sensor-esp32/
+
+https://how2electronics.com/blood-oxygen-heart-rate-monitor-max30100-arduino/
+
+https://reedpaper.wordpress.com/2018/08/22/pulse-oximeter-max30100-max30102-how-to-fix-wrong-board/
+
+
+
