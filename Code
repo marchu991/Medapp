@@ -1,0 +1,189 @@
+
+#include <OneWire.h>
+#include <DallasTemperature.h>
+#include <ESP8266WiFi.h>
+#include <WiFiClient.h> 
+#include <Wire.h>
+#include "MAX30100_PulseOximeter.h"
+#include "Adafruit_MQTT.h"
+#include "Adafruit_MQTT_Client.h"
+
+#define AIO_SERVER      "io.adafruit.com"
+#define AIO_SERVERPORT  1883                   // use 8883 for SSL
+#define AIO_USERNAME  "Nombre de usuario dashboard"
+#define AIO_KEY       "key de dashboard"
+
+
+#define WLAN_SSID       "nombre de red wifi"
+#define WLAN_PASS       "contraseña red wifi"
+
+char AUTH[] = "usuario dashboard";
+
+WiFiClient client;
+
+Adafruit_MQTT_Client mqtt(&client, AIO_SERVER, AIO_SERVERPORT, AIO_USERNAME, AIO_USERNAME, AIO_KEY);
+Adafruit_MQTT_Publish temperatura = Adafruit_MQTT_Publish(&mqtt, AIO_USERNAME "/feeds/temperatura");
+Adafruit_MQTT_Publish SpO2 = Adafruit_MQTT_Publish(&mqtt, AIO_USERNAME "/feeds/SpO2");
+Adafruit_MQTT_Publish Ritmo = Adafruit_MQTT_Publish(&mqtt, AIO_USERNAME "/feeds/Ritmo");
+Adafruit_MQTT_Publish ECG = Adafruit_MQTT_Publish(&mqtt, AIO_USERNAME "/feeds/ECG");
+
+void MQTT_connect();
+
+int contconexion = 0;
+
+const int ds18b = 14;     
+
+OneWire oneWire(ds18b);
+
+DallasTemperature sensors(&oneWire);
+
+PulseOximeter pox;
+uint32_t tsLastReport = 0;
+int sat;
+int rit;
+int SCorazon = 0;
+int ecg;
+int cont = 0;
+int muestras = 30;
+int cora[30];
+byte i;
+int band = 0;
+
+void setup() 
+{
+
+  Serial.begin(9600);
+  delay(10);
+  
+
+  pinMode(SCorazon, INPUT);
+
+  sensors.begin();
+
+  // Connect to WiFi access point.
+  Serial.println(); Serial.println();
+  Serial.print("Connecting to ");
+  Serial.println(WLAN_SSID);
+
+  WiFi.begin(WLAN_SSID, WLAN_PASS);
+  while (WiFi.status() != WL_CONNECTED) {
+  delay(2000);
+  Serial.print(".");
+  }
+  Serial.println();
+
+  Serial.println("WiFi connected");
+  Serial.println("IP address: "); Serial.println(WiFi.localIP());
+
+}
+
+void loop() 
+{
+ MQTT_connect();
+  
+  float temp = Temperatura();
+  void max30100();
+    delay(10);
+
+for(i=0;i<muestras;i++)
+  {
+    unsigned long tant =millis(); //Toma el tiempo actual
+    cora[i]=analogRead(SCorazon); //guarda los datos en el vector
+     while(millis()-tant<2000/50)delayMicroseconds(400); //esta sentencia es la que define la frecuencia de muestreo
+  }
+
+for(i=0;i<muestras;i++) //este for es el que envía los datos de ECG al MQTT
+{
+  ecg = cora[i];
+   
+    if (! ECG.publish(ecg)) 
+     { Serial.println(F("Failed"));
+    }
+    else 
+    {
+      Serial.println(F("OK!"));
+    }
+ band = 1;   
+
+ delay (3500);// los envía cada 3.5seg para no saturar el servidor
+ 
+}
+
+
+if(band == 1) //este IF, envía el resto de los datos una vez que se enviaron todos los datos del ECG asi que se actualiza una vez cada 1:40 min
+  { 
+ if (! temperatura.publish(temp)) 
+  {   Serial.println(F("Failed"));
+   } else {
+      Serial.println(F("OK!"));
+    }
+
+   if (! SpO2.publish(sat)) 
+  {   Serial.println(F("Failed"));
+    } else {
+      Serial.println(F("OK!"));
+    }
+
+    if (! Ritmo.publish(rit)) 
+  {   Serial.println(F("Failed"));
+    } else {
+      Serial.println(F("OK!"));
+    } 
+    delay(1000);
+    i = 0;
+    band = 0;
+    Serial.println("el resto");
+    Serial.println(rit);
+    Serial.println(temp);
+    Serial.println(sat);
+  }
+ }
+}
+
+float Temperatura()
+{ 
+  sensors.requestTemperatures(); 
+  float temperaturaC = sensors.getTempCByIndex(0);
+  return temperaturaC;
+    }
+
+
+void max30100()
+{
+  pox.update();
+
+  if (millis() - tsLastReport > 1000) 
+  {
+   rit = pox.getHeartRate();
+   sat = pox.getSpO2();
+   tsLastReport = millis();
+  }
+}
+
+
+void MQTT_connect() 
+{
+  int8_t ret;
+
+  // Stop if already connected.
+  if (mqtt.connected())
+  {
+    return;
+  }
+
+  Serial.print("Connecting to MQTT... ");
+
+  uint8_t retries = 3;
+  while ((ret = mqtt.connect()) != 0) { // connect will return 0 for connected
+       Serial.println(mqtt.connectErrorString(ret));
+       Serial.println("Retrying MQTT connection in 5 seconds...");
+       mqtt.disconnect();
+       delay(5000);  // wait 5 seconds
+       retries--;
+       if (retries == 0) {
+         // basically die and wait for WDT to reset me
+         while (1);
+       }
+  }
+  Serial.println("MQTT Connected!");
+}
